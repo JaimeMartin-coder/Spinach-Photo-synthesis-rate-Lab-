@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spinach Disk Photosynthesis Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef4f5; --card:#ffffff; --ink:#12343b; --muted:#4a6168;
+    --accent:#2f7d46; --accent-ink:#ffffff; --amber:#f2b134; --amber-soft:#fff4d6;
+    --blue:#1d6fa3; --line:#c3d3d6; --soft:#e2eeea; --bad:#a63d1a; --good:#1f7a3e;
+    --font:"Atkinson Hyperlegible","Segoe UI",Verdana,Arial,sans-serif;
+    --scale:1.0625rem;
+  }
+  body.hc{
+    --bg:#000; --card:#000; --ink:#fff; --muted:#fff; --accent:#ffd400; --accent-ink:#000;
+    --amber:#ffd400; --amber-soft:#1a1a00; --blue:#7fd4ff; --line:#fff; --soft:#111; --bad:#ff9a7a; --good:#8dff9a;
+  }
+  *{box-sizing:border-box}
+  html{font-size:var(--scale)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
+  body.easy{letter-spacing:.025em;word-spacing:.12em;line-height:1.85}
+  body.easy p,body.easy li{max-width:62ch}
+  .skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--bg);padding:.5rem 1rem;z-index:99}
+  .skip:focus{left:0}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+  body.hc :focus-visible{outline-color:#ffd400}
+
+  header{background:var(--ink);color:#fff;padding:1.25rem 1.25rem 1rem}
+  body.hc header{border-bottom:2px solid #fff}
+  header h1{margin:0;font-size:1.7rem;line-height:1.2}
+  header .sub{margin:.25rem 0 .9rem;color:#cfe3e6;max-width:62ch}
+  body.hc header .sub{color:#fff}
+  .toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+  .toolbar .tb{font:inherit;font-size:.85rem;background:transparent;color:#fff;border:1.5px solid #8fb2b8;border-radius:999px;padding:.35rem .8rem;cursor:pointer;min-height:40px}
+  .toolbar .tb[aria-pressed="true"]{background:var(--amber);color:#12343b;border-color:var(--amber)}
+  .toolbar select{font:inherit;font-size:.85rem;border-radius:999px;padding:.35rem .6rem;min-height:40px;border:1.5px solid #8fb2b8;background:transparent;color:#fff}
+  .toolbar select option{color:#000}
+
+  main{max-width:1120px;margin:0 auto;padding:1.25rem 1rem 3rem}
+  h2{font-size:1.5rem;margin:.2rem 0 .75rem;line-height:1.25}
+  h3{font-size:1.15rem;margin:1.2rem 0 .4rem}
+  p{margin:.5rem 0 .9rem}
+  .box{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:1rem 1.1rem;margin:1rem 0}
+  .ngss{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 1rem}
+  .ngss span{font-size:.82rem;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:.25rem .6rem}
+  .ngss b{display:block;font-size:.78rem;color:var(--muted)}
+  ol.steps li,ul.list li{margin:.4rem 0}
+  .hint{font-size:.9rem;color:var(--muted)}
+  .read{font:inherit;font-size:.85rem;background:var(--soft);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:.3rem .8rem;cursor:pointer;float:right;margin-left:.5rem;min-height:36px}
+
+  .btn{font:inherit;font-weight:700;background:var(--accent);color:var(--accent-ink);border:2px solid var(--accent);border-radius:10px;padding:.65rem 1.1rem;cursor:pointer;min-height:48px}
+  .btn.alt{background:transparent;color:var(--ink);border-color:var(--ink)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.sm{min-height:40px;padding:.3rem .7rem;font-size:.85rem}
+
+  /* step strip */
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:.45rem;margin:.6rem 0 1rem}
+  .sc{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:.45rem .6rem;display:flex;flex-direction:column;gap:.1rem;font-size:.85rem;line-height:1.35}
+  .sc.now{border-color:var(--accent);box-shadow:0 0 0 3px var(--soft)}
+  body.hc .sc.now{box-shadow:none;border-width:4px}
+  .sc.done{background:var(--soft)}
+  .sc .t{font-weight:700}
+  .sc .chip{font-size:.78rem;color:var(--muted)}
+  .sc .chip.ok{color:var(--good);font-weight:700}
+  .sc button{align-self:flex-start;margin-top:.2rem}
+
+  /* bench */
+  .bench{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:1rem;align-items:start}
+  @media(max-width:900px){.bench{grid-template-columns:1fr}}
+  .stage{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:.5rem}
+  .stage svg{width:100%;height:auto;display:block}
+  .stage.locked #lampG{cursor:not-allowed}
+  #lampG{cursor:grab;touch-action:none}
+  .readout{display:grid;grid-template-columns:auto 1fr;gap:.2rem 1rem;align-items:center;padding:.5rem .6rem .3rem}
+  .clock{font-size:2.4rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .clock small{display:block;font-size:.85rem;font-weight:400;color:var(--muted)}
+  .track{position:relative;height:14px;background:var(--soft);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .track i{display:block;height:100%;width:0;background:var(--accent)}
+  .ticks{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:2px}
+  .controls{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:1rem}
+  .ctl{margin:0 0 .8rem}
+  .ctl .lab{font-weight:700;font-size:.92rem;margin-bottom:.25rem}
+  .dist{font-size:2rem;font-weight:700;line-height:1.1;display:inline}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}
+  .seg button{font:inherit;font-size:.85rem;padding:.4rem .2rem;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer;min-height:46px;line-height:1.25}
+  .seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);font-weight:700}
+  body.hc .seg button[aria-pressed="true"]{border-color:#ffd400;border-width:4px}
+  .seg button:disabled{opacity:.55;cursor:not-allowed}
+  .row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+  .row .btn{flex:1}
+  #labMsg{padding:.6rem .8rem;background:var(--soft);border-radius:10px;margin:.7rem 0;min-height:4.5em}
+  ul.chk{list-style:none;padding:0;margin:.3rem 0}
+  ul.chk li{margin:.15rem 0;font-size:.93rem}
+  ul.chk li.ok{color:var(--good)}
+  ul.chk li.no{color:var(--ink)}
+  .fixed{font-size:.9rem;background:var(--soft);border-radius:10px;padding:.6rem .8rem;margin-top:.8rem}
+  .fixed b{display:block}
+
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;background:var(--card)}
+  th,td{border:1.5px solid var(--line);padding:.35rem .5rem;text-align:center}
+  th{background:var(--soft)}
+  .teacher-only{border:3px dashed var(--bad);border-radius:12px;padding:1rem;margin-top:2rem}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to lab content</a>
+
+<header>
+  <h1>Spinach Disk Photosynthesis Lab</h1>
+  <p class="sub">What changes how fast spinach disks float? Light distance, light color, carbon dioxide, and temperature.</p>
+  <div class="toolbar" role="toolbar" aria-label="Reading and display tools">
+    <button class="tb" id="tbEasy" aria-pressed="false">Easy-read font</button>
+    <button class="tb" id="tbBig" aria-label="Bigger text">A+</button>
+    <button class="tb" id="tbSmall" aria-label="Smaller text">A&minus;</button>
+    <button class="tb" id="tbHC" aria-pressed="false">High contrast</button>
+    <button class="tb" id="tbSel">Read my selection</button>
+    <button class="tb" id="tbStop">Stop reading</button>
+    <select id="voiceRate" aria-label="Reading speed">
+      <option value="0.8">Slow voice</option>
+      <option value="1" selected>Normal voice</option>
+      <option value="1.2">Fast voice</option>
+    </select>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="box" id="intro" aria-labelledby="introH">
+  <button class="read" id="readIntro">Read directions aloud</button>
+  <h2 id="introH">Background and directions</h2>
+  <div class="ngss" aria-label="Learning targets">
+    <span><b>Performance expectation</b>HS-LS1-5</span>
+    <span><b>Science practice</b>Planning and carrying out investigations; analyzing data</span>
+    <span><b>Core idea</b>LS1.C Organization for matter and energy flow</span>
+    <span><b>Crosscutting concept</b>Energy and matter</span>
+  </div>
+  <p>Small disks are punched out of a spinach leaf and placed in a baking soda solution. The disks <b>sink</b> at first because their air spaces are filled with liquid. When the leaf photosynthesizes, it makes <b>oxygen gas</b>. The gas fills the air spaces and the disks <b>float</b> to the top. The faster photosynthesis happens, the sooner the disks float. The baking soda is the source of <b>carbon dioxide (CO<sub>2</sub>)</b> for the leaf.</p>
+  <h3>Directions</h3>
+  <ol class="steps">
+    <li>You will run an <b>initial test</b> and then <b>8 experiments</b>, so <b>9 trials</b> in all. Every trial uses <b>10 fresh disks</b> and lasts up to <b>4 minutes</b>.</li>
+    <li>Before each trial, <b>set up the lab</b> exactly as the step says: drag the clamp lamp, choose the amount of baking soda, choose the light, and choose the water temperature. <b>Start trial</b> will not work until all four settings are right. Each experiment changes <b>only one thing</b> from the starting settings, so set everything else back to the starting settings.</li>
+    <li>Press <b>Start trial</b> and watch the disks. The lab runs in <b>real time</b>. It cannot be sped up, slowed down, or paused. A beep sounds at the end of every minute. <b>Count the disks that are floating</b> and write the number on <b>your own data table</b>. Count a disk only when it reaches the surface.</li>
+    <li>If <b>all 10 disks</b> reach the surface before 4 minutes, press <b>Stop trial</b> and write down the time on the clock. If they do not all float, the trial ends at 4:00 on its own. Record your final count.</li>
+    <li>After all 9 trials, finish your graph and conclusion on your paper.</li>
+  </ol>
+  <p class="hint">Each trial takes up to 4 minutes, so have your data table ready and turn your sound on so you can hear the minute beep.</p>
+</section>
+
+<section id="lab" aria-labelledby="labH">
+  <h2 id="labH">Run the lab</h2>
+  <div class="strip" id="stepStrip"></div>
+
+  <div class="bench">
+    <div class="stage" id="stage">
+      <svg id="scene" viewBox="0 0 560 350" role="img" aria-label="A clear cup of solution with 10 spinach disks. A clamp lamp on a ruler sits to the left of the cup.">
+        <rect x="20" y="300" width="520" height="8" rx="3" fill="#8a9ba0"/>
+        <line x1="50" y1="314" x2="300" y2="314" stroke="#4a6168" stroke-width="2"/>
+        <g id="ruler" font-size="11" fill="#4a6168" text-anchor="middle"></g>
+        <text x="175" y="349" text-anchor="middle" font-size="11" fill="#4a6168">distance from the cup (cm)</text>
+        <line id="targetLine" x1="0" y1="82" x2="0" y2="300" stroke="#f2b134" stroke-width="2" stroke-dasharray="5 4"/>
+        <text id="targetLabel" x="0" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#8a5a00"></text>
+        <polygon id="beam" points="0,0 0,0 0,0 0,0" fill="#ffe066" opacity="0"/>
+        <rect id="water" x="301" y="100" width="178" height="199" fill="hsla(200,70%,70%,.5)"/>
+        <g id="disks"></g>
+        <path d="M300 70 L300 300 L480 300 L480 70" fill="none" stroke="#12343b" stroke-width="3"/>
+        <line x1="301" y1="100" x2="479" y2="100" stroke="#ffffff" stroke-width="2" opacity=".9"/>
+        <text id="tag1" x="390" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#12343b"></text>
+        <text id="tag2" x="390" y="55" text-anchor="middle" font-size="12" fill="#12343b"></text>
+        <g id="lampG" tabindex="0" role="slider" aria-label="Clamp lamp distance from cup in centimeters" aria-valuemin="5" aria-valuemax="50" aria-valuenow="45" aria-valuetext="45 centimeters">
+          <rect x="-56" y="150" width="72" height="156" fill="transparent"/>
+          <g transform="translate(0,185)">
+            <path d="M-46 -12 Q-46 -24 -34 -24 L-8 -20 Q0 -16 0 0 Q0 16 -8 20 L-34 24 Q-46 24 -46 12 Z" fill="#3b4a50"/>
+            <circle cx="-2" cy="0" r="9" fill="#ffe066" stroke="#3b4a50" stroke-width="2"/>
+          </g>
+          <rect id="film" x="1" y="161" width="7" height="48" rx="2" fill="#9b3bd1" opacity="0"/>
+          <line x1="-30" y1="209" x2="-30" y2="292" stroke="#3b4a50" stroke-width="6" stroke-linecap="round"/>
+          <rect x="-54" y="292" width="48" height="8" rx="2" fill="#3b4a50"/>
+        </g>
+        <text id="lampText" x="0" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#12343b"></text>
+      </svg>
+      <div class="readout">
+        <div class="clock"><span id="clock">0:00</span><small>time in the experiment</small></div>
+        <div>
+          <div class="track" aria-hidden="true"><i id="prog"></i></div>
+          <div class="ticks" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4 min</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="ctl">
+        <div class="lab">Clamp lamp distance</div>
+        <span class="dist" id="lampDist">45</span> <span class="dist" style="font-size:1.1rem;font-weight:400">cm from the cup</span>
+        <div class="row">
+          <button class="btn alt sm" id="btnCloser">Closer (&minus;5 cm)</button>
+          <button class="btn alt sm" id="btnFarther">Farther (+5 cm)</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <div class="lab" id="labCO2">Baking soda (CO<sub>2</sub> source)</div>
+        <div class="seg" id="segCO2" role="group" aria-labelledby="labCO2"></div>
+      </div>
+      <div class="ctl">
+        <div class="lab" id="labLight">Light</div>
+        <div class="seg" id="segLight" role="group" aria-labelledby="labLight"></div>
+      </div>
+      <div class="ctl">
+        <div class="lab" id="labTemp">Water temperature</div>
+        <div class="seg" id="segTemp" role="group" aria-labelledby="labTemp"></div>
+      </div>
+
+      <div id="labMsg" aria-live="polite"></div>
+      <div class="row">
+        <button class="btn" id="btnStart">Start trial</button>
+        <button class="btn" id="btnStop" hidden>All 10 are floating: Stop trial</button>
+        <button class="btn" id="btnNext" hidden>Next step</button>
+      </div>
+      <div class="fixed"><b>Starting settings:</b>Lamp 25 cm, normal CO<sub>2</sub>, clear light, water 22 &deg;C. Same spinach leaf, same 10 disks, same cup every time.</div>
+      <p style="margin:.9rem 0 0"><button class="btn alt sm" id="resetBtn">Start over</button></p>
+    </div>
+  </div>
+</section>
+
+<section class="teacher-only" id="teacherKey" hidden>
+  <h3 style="margin-top:0">Teacher notes (visible only when the web address ends with #teacher)</h3>
+  <p>Approximate number of disks floating at the end of each minute, and when all 10 float (blank = not all 10 float within 4 minutes). Each run has small random variation, so student counts may differ by about 1 disk.</p>
+  <div class="tablewrap"><table id="tblKey"></table></div>
+  <p class="hint">Steps run in this fixed order. The lamp starts at 45 cm so students must set it. Students must also return CO<sub>2</sub>, light, and temperature to the starting settings before each trial that does not change them. Each trial runs in real time (4 minutes). To change that, edit SEC_PER_MIN in the script. To change any rate, edit the s (first disk) and e (last disk) values in STEPS.</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  var CUPX = 300, PXCM = 5, RISE = 0.05, BUBBLE = 0.5, DURATION = 4;
+  var SEC_PER_MIN = 60; // real time: 1 minute of experiment = 60 seconds
+
+  var CO2 = {less:'Less CO\u2082', normal:'Normal CO\u2082', more:'More CO\u2082'};
+  var LIGHT = {white:'Clear light', rb:'Red + blue light', green:'Green light'};
+  var TEMP = {10:'10 \u00B0C', 22:'22 \u00B0C (room)', 40:'40 \u00B0C'};
+  var BASE = {d:25, co2:'normal', light:'white', temp:22};
+  function mk(c){ return Object.assign({}, BASE, c); }
+
+  // s = time (min) the first disk reaches the surface, e = time the last disk would reach it
+  var STEPS = [
+    {name:'Initial test (25 cm)', short:'Initial test', cond:mk({}),            prof:{s:1.4, e:3.7}},
+    {name:'More CO\u2082',        short:'More CO\u2082', cond:mk({co2:'more'}),   prof:{s:1.0, e:2.8}},
+    {name:'Less CO\u2082',        short:'Less CO\u2082', cond:mk({co2:'less'}),   prof:{s:2.5, e:6.5}},
+    {name:'Red + blue light',     short:'Red + blue',    cond:mk({light:'rb'}),   prof:{s:1.2, e:3.3}},
+    {name:'Green light',          short:'Green light',   cond:mk({light:'green'}),prof:{s:3.0, e:11}},
+    {name:'Water at 40 \u00B0C',  short:'40 \u00B0C',    cond:mk({temp:40}),      prof:{s:2.6, e:7.5}},
+    {name:'Water at 10 \u00B0C',  short:'10 \u00B0C',    cond:mk({temp:10}),      prof:{s:3.4, e:9}},
+    {name:'Lamp at 15 cm',        short:'Lamp 15 cm',    cond:mk({d:15}),         prof:{s:1.0, e:2.6}},
+    {name:'Lamp at 35 cm',        short:'Lamp 35 cm',    cond:mk({d:35}),         prof:{s:2.2, e:6.0}}
+  ];
+  var N = STEPS.length;
+  var STORE_KEY = 'spinachDiskLab_v2';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function $(id){return document.getElementById(id);}
+  function qsa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+
+  /* ---------- state ---------- */
+  var S = {
+    cond:{d:45, co2:'normal', light:'white', temp:22},
+    locked:false, cur:0, status:'idle',
+    trials:[], done:[], view:{trial:null, tm:0}, replay:false, prev:null, activeStep:0,
+    lastTick:null, flashUntil:0, notYetUntil:0, stopTime:null, minute:0,
+    prefs:{easy:false, hc:false, scale:1.0625}
+  };
+  for(var q=0;q<N;q++){ S.trials.push(null); S.done.push(false); }
+
+  /* ---------- display prefs ---------- */
+  try{ var raw=localStorage.getItem(STORE_KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.prefs) S.prefs=Object.assign(S.prefs,o.prefs); } }catch(e){}
+  function savePrefs(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify({prefs:S.prefs})); }catch(e){} }
+  function applyPrefs(){
+    document.body.classList.toggle('easy', !!S.prefs.easy);
+    document.body.classList.toggle('hc', !!S.prefs.hc);
+    document.documentElement.style.setProperty('--scale', S.prefs.scale+'rem');
+    $('tbEasy').setAttribute('aria-pressed', String(!!S.prefs.easy));
+    $('tbHC').setAttribute('aria-pressed', String(!!S.prefs.hc));
+  }
+  $('tbEasy').onclick=function(){S.prefs.easy=!S.prefs.easy;applyPrefs();savePrefs();};
+  $('tbHC').onclick=function(){S.prefs.hc=!S.prefs.hc;applyPrefs();savePrefs();};
+  $('tbBig').onclick=function(){S.prefs.scale=Math.min(1.5,S.prefs.scale+0.125);applyPrefs();savePrefs();};
+  $('tbSmall').onclick=function(){S.prefs.scale=Math.max(0.875,S.prefs.scale-0.125);applyPrefs();savePrefs();};
+
+  /* ---------- read aloud ---------- */
+  function speak(text){
+    if(!('speechSynthesis' in window)){ alert('Read-aloud is not available in this browser.'); return; }
+    window.speechSynthesis.cancel();
+    if(!text) return;
+    var u=new SpeechSynthesisUtterance(text);
+    u.rate=parseFloat($('voiceRate').value)||1;
+    window.speechSynthesis.speak(u);
+  }
+  function sectionText(id){
+    var clone=$(id).cloneNode(true);
+    qsa('.read,button,select,input,svg',clone).forEach(function(n){n.remove();});
+    qsa('h2,h3,li,p',clone).forEach(function(n){n.appendChild(document.createTextNode(' . '));});
+    return clone.textContent.replace(/\s+/g,' ').replace(/(\s*\.\s*){2,}/g,'. ').trim();
+  }
+  $('readIntro').onclick=function(){ speak(sectionText('intro')); };
+  $('tbSel').onclick=function(){
+    var t=String(window.getSelection?window.getSelection():'').trim();
+    if(!t){ alert('Highlight some text first, then press this button.'); return; }
+    speak(t);
+  };
+  $('tbStop').onclick=function(){ if('speechSynthesis' in window) window.speechSynthesis.cancel(); };
+
+  /* ---------- static scene parts ---------- */
+  (function(){
+    var r=$('ruler');
+    for(var cm=0; cm<=50; cm+=5){
+      var x=CUPX-cm*PXCM;
+      var l=document.createElementNS(NS,'line');
+      l.setAttribute('x1',x); l.setAttribute('x2',x); l.setAttribute('y1',314); l.setAttribute('y2', cm%10===0?326:321);
+      l.setAttribute('stroke','#4a6168'); l.setAttribute('stroke-width','2'); r.appendChild(l);
+      if(cm%10===0){
+        var t=document.createElementNS(NS,'text'); t.setAttribute('x',x); t.setAttribute('y',340); t.textContent=cm; r.appendChild(t);
+      }
+    }
+  })();
+
+  var BOT=[], SURF=[];
+  for(var i=0;i<10;i++){
+    BOT.push(i<5 ? {x:330+i*30, y:290} : {x:345+(i-5)*30, y:275});
+    SURF.push({x:313+i*17.5, y:109});
+  }
+  var diskEls=[], bubEls=[];
+  (function(){
+    var g=$('disks');
+    var offs=[[-5,-8],[5,-9],[0,-12]];
+    for(var i=0;i<10;i++){
+      var d=document.createElementNS(NS,'g');
+      var c=document.createElementNS(NS,'circle'); c.setAttribute('r',7); c.setAttribute('fill','#4f9d3d'); c.setAttribute('stroke','#1f5a1a'); c.setAttribute('stroke-width','1.5'); d.appendChild(c);
+      var v=document.createElementNS(NS,'line'); v.setAttribute('x1',-4); v.setAttribute('x2',4); v.setAttribute('y1',0); v.setAttribute('y2',0); v.setAttribute('stroke','#2f7d2a'); v.setAttribute('stroke-width','1'); d.appendChild(v);
+      var bs=[];
+      offs.forEach(function(o){
+        var b=document.createElementNS(NS,'circle'); b.setAttribute('cx',o[0]); b.setAttribute('cy',o[1]); b.setAttribute('r',1.9);
+        b.setAttribute('fill','#ffffff'); b.setAttribute('stroke','#6fa3b8'); b.setAttribute('stroke-width','.8'); b.setAttribute('opacity','0'); d.appendChild(b); bs.push(b);
+      });
+      g.appendChild(d); diskEls.push(d); bubEls.push(bs);
+    }
+  })();
+
+  /* ---------- trial times ---------- */
+  function genTrial(prof){
+    var s=prof.s+Math.random()*0.1;
+    var e=prof.e-Math.random()*0.15;
+    var sp=(e-s)/9, t=[], k;
+    for(k=0;k<10;k++){
+      var j=(k===0||k===9)?0:(Math.random()-0.5)*0.7*sp;
+      t.push(s+sp*k+j);
+    }
+    t.sort(function(a,b){return a-b;});
+    for(k=1;k<10;k++){ if(t[k]-t[k-1]<0.06) t[k]=t[k-1]+0.06; }
+    var perm=[0,1,2,3,4,5,6,7,8,9];
+    for(k=9;k>0;k--){ var m=Math.floor(Math.random()*(k+1)); var tmp=perm[k]; perm[k]=perm[m]; perm[m]=tmp; }
+    return {t:t, perm:perm};
+  }
+
+  /* ---------- scene from current settings ---------- */
+  var BEAM={white:'#ffe066', rb:'#b04ad8', green:'#4cd36a'};
+  var FILM={white:0, rb:0.85, green:0.85};
+  var FILMC={white:'#ffffff', rb:'#9b3bd1', green:'#2fbf55'};
+  var WATER={10:'hsla(210,80%,72%,.55)', 22:'hsla(200,70%,70%,.5)', 40:'hsla(28,80%,72%,.5)'};
+  function updateScene(){
+    var c=S.cond, lx=CUPX-c.d*PXCM;
+    $('lampG').setAttribute('transform','translate('+lx+',0)');
+    $('lampG').setAttribute('aria-valuenow',c.d);
+    $('lampG').setAttribute('aria-valuetext',c.d+' centimeters');
+    $('lampText').setAttribute('x',lx-20);
+    $('lampText').textContent=c.d+' cm';
+    $('beam').setAttribute('points',lx+',175 '+CUPX+',95 '+CUPX+',290 '+lx+',195');
+    var f=Math.min(1,Math.pow(12/c.d,2));
+    $('beam').setAttribute('opacity',(0.08+0.55*f).toFixed(2));
+    $('beam').setAttribute('fill',BEAM[c.light]);
+    $('film').setAttribute('fill',FILMC[c.light]);
+    $('film').setAttribute('opacity',FILM[c.light]);
+    $('water').setAttribute('fill',WATER[c.temp]);
+    $('tag1').textContent='Solution: '+CO2[c.co2]+', '+c.temp+' \u00B0C';
+    $('tag2').textContent='Light: '+LIGHT[c.light]+'  |  10 spinach disks';
+    $('lampDist').textContent=c.d;
+  }
+  function setCond(key,val){
+    if(S.locked) return;
+    S.cond[key]=val;
+    updateScene(); updateUI();
+  }
+  function setLamp(d){
+    d=Math.max(5,Math.min(50,Math.round(d/5)*5));
+    S.cond.d=d; updateScene(); updateUI();
+  }
+
+  /* ---------- controls ---------- */
+  function buildSeg(id,map,key,numeric,labelFn){
+    var box=$(id); box.innerHTML='';
+    Object.keys(map).forEach(function(k){
+      var b=document.createElement('button'); b.type='button';
+      b.setAttribute('data-val',k); b.textContent=labelFn?labelFn(k):map[k];
+      b.onclick=function(){ setCond(key, numeric?Number(k):k); };
+      box.appendChild(b);
+    });
+  }
+  buildSeg('segCO2',CO2,'co2',false,function(k){return {less:'Less',normal:'Normal',more:'More'}[k];});
+  buildSeg('segLight',LIGHT,'light',false,function(k){return {white:'Clear',rb:'Red + blue',green:'Green'}[k];});
+  buildSeg('segTemp',TEMP,'temp',true,function(k){return {10:'10 \u00B0C ice',22:'22 \u00B0C room',40:'40 \u00B0C warm'}[k];});
+
+  function svgX(e){
+    var svg=$('scene'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse()).x;
+  }
+  var drag=null, lg=$('lampG');
+  lg.addEventListener('pointerdown',function(e){
+    if(S.locked) return;
+    drag={off:svgX(e)-(CUPX-S.cond.d*PXCM)};
+    try{lg.setPointerCapture(e.pointerId);}catch(x){}
+    e.preventDefault();
+  });
+  lg.addEventListener('pointermove',function(e){
+    if(!drag||S.locked) return;
+    setLamp((CUPX-(svgX(e)-drag.off))/PXCM);
+  });
+  lg.addEventListener('pointerup',function(){drag=null;});
+  lg.addEventListener('pointercancel',function(){drag=null;});
+  lg.addEventListener('keydown',function(e){
+    if(S.locked) return;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp'){ setLamp(S.cond.d-5); e.preventDefault(); }
+    else if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ setLamp(S.cond.d+5); e.preventDefault(); }
+  });
+  $('btnCloser').onclick=function(){ if(!S.locked) setLamp(S.cond.d-5); };
+  $('btnFarther').onclick=function(){ if(!S.locked) setLamp(S.cond.d+5); };
+
+  /* ---------- minute beep ---------- */
+  var actx=null;
+  function getCtx(){
+    try{
+      if(!actx){ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; actx=new AC(); }
+      if(actx.state==='suspended') actx.resume();
+    }catch(e){ return null; }
+    return actx;
+  }
+  function beep(){
+    var c=getCtx(); if(!c) return;
+    try{
+      var o=c.createOscillator(), g=c.createGain();
+      o.type='sine'; o.frequency.value=880; g.gain.value=0.0001;
+      o.connect(g); g.connect(c.destination);
+      var t=c.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.2,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+      o.start(t); o.stop(t+0.45);
+    }catch(e){}
+  }
+  function fmt(tm){
+    var mm=Math.floor(tm+1e-9), ss=Math.floor((tm-mm)*60+1e-6);
+    return mm+':'+(ss<10?'0':'')+ss;
+  }
+
+  /* ---------- trial control ---------- */
+  function setupItems(req){
+    var c=S.cond;
+    return [
+      {label:'Lamp distance',      want:req.d+' cm',       have:c.d+' cm',        ok:c.d===req.d},
+      {label:'Baking soda',        want:CO2[req.co2],      have:CO2[c.co2],       ok:c.co2===req.co2},
+      {label:'Light',              want:LIGHT[req.light],  have:LIGHT[c.light],   ok:c.light===req.light},
+      {label:'Water temperature',  want:TEMP[req.temp],    have:TEMP[c.temp],     ok:c.temp===req.temp}
+    ];
+  }
+  function allSet(){
+    return setupItems(STEPS[S.cur].cond).every(function(it){return it.ok;});
+  }
+  function startTrial(){
+    if(S.status!=='idle'||!allSet()) return;
+    getCtx(); S.flashUntil=0; S.stopTime=null;
+    if(!S.trials[S.cur]) S.trials[S.cur]=genTrial(STEPS[S.cur].prof);
+    S.activeStep=S.cur; S.replay=false;
+    S.view={trial:S.trials[S.cur], tm:0};
+    S.locked=true; S.status='running';
+    updateUI();
+  }
+  function minuteReached(m){
+    beep();
+    if(m>=DURATION){ finish(); return; }
+    S.minute=m; S.flashUntil=m+0.12; updateUI();
+  }
+  function finish(early){
+    S.flashUntil=0;
+    if(!early) S.view.tm=DURATION;
+    if(S.replay){
+      var p=S.prev; S.replay=false;
+      S.status=p.status; S.locked=p.locked; S.view=p.view; S.cond=p.cond;
+      updateScene(); updateUI();
+      return;
+    }
+    S.done[S.cur]=true; S.status='done'; S.locked=true;
+    S.stopTime = early ? S.view.tm : null;
+    updateUI();
+  }
+  function stopTrial(){
+    if(S.status!=='running'||!S.view.trial) return;
+    var last=S.view.trial.t[9];
+    if(S.view.tm<last){ S.notYetUntil=performance.now()+4000; updateUI(); return; }
+    finish(true);
+  }
+  function nextStep(){
+    if(S.status!=='done'||S.cur>=N-1) return;
+    S.stopTime=null;
+    S.cur++; S.status='idle'; S.locked=false;
+    S.view={trial:null,tm:0};
+    updateUI();
+  }
+  function startReplay(i){
+    if(!(S.status==='idle'||S.status==='done')||!S.done[i]) return;
+    getCtx(); S.flashUntil=0;
+    S.prev={status:S.status, locked:S.locked, cond:Object.assign({},S.cond), view:{trial:S.view.trial, tm:S.view.tm}};
+    S.replay=true; S.activeStep=i; S.locked=true;
+    S.cond=Object.assign({},STEPS[i].cond);
+    S.view={trial:S.trials[i], tm:0};
+    S.status='running';
+    updateScene(); updateUI();
+  }
+  $('btnStart').onclick=startTrial;
+  $('btnStop').onclick=stopTrial;
+  $('btnNext').onclick=nextStep;
+  $('resetBtn').onclick=function(){
+    if(confirm('Start the whole lab over from the Initial test?')){
+      S.cur=0; S.status='idle'; S.view={trial:null,tm:0}; S.locked=false; S.replay=false; S.prev=null; S.stopTime=null;
+      for(var q=0;q<N;q++){ S.trials[q]=null; S.done[q]=false; }
+      S.cond={d:45, co2:'normal', light:'white', temp:22};
+      updateScene(); updateUI();
+    }
+  };
+
+  /* ---------- UI refresh ---------- */
+  function updateUI(){
+    var st=S.status, stepIdx=S.replay?S.activeStep:S.cur, step=STEPS[S.cur], req=STEPS[stepIdx].cond;
+    var items=setupItems(STEPS[S.cur].cond), ready=items.every(function(it){return it.ok;});
+
+    // target marker for the lamp
+    var tx=CUPX-req.d*PXCM, dOk=(S.cond.d===req.d);
+    $('targetLine').setAttribute('x1',tx); $('targetLine').setAttribute('x2',tx);
+    $('targetLabel').setAttribute('x',tx);
+    $('targetLabel').textContent='Target: '+req.d+' cm';
+    $('targetLine').setAttribute('stroke', dOk?'#2f9a55':'#f2b134');
+    $('targetLabel').setAttribute('fill', dOk?'#1f7a3e':'#8a5a00');
+
+    // controls
+    $('stage').classList.toggle('locked',S.locked);
+    $('btnCloser').disabled=S.locked; $('btnFarther').disabled=S.locked;
+    [['segCO2','co2'],['segLight','light'],['segTemp','temp']].forEach(function(p){
+      qsa('button',$(p[0])).forEach(function(b){
+        b.disabled=S.locked;
+        b.setAttribute('aria-pressed', String(String(S.cond[p[1]])===b.getAttribute('data-val')));
+      });
+    });
+
+    // buttons
+    $('btnStart').hidden=!(st==='idle');
+    $('btnStart').disabled=!ready;
+    $('btnStop').hidden=!(st==='running');
+    $('btnNext').hidden=!(st==='done'&&S.cur<N-1);
+    if(S.cur<N-1) $('btnNext').textContent='Next: '+STEPS[S.cur+1].name;
+
+    // message
+    var h='';
+    if(st==='idle'){
+      h='<b>Step '+(S.cur+1)+' of '+N+': '+step.name+'</b><ul class="chk">'+
+        items.map(function(it){
+          return '<li class="'+(it.ok?'ok':'no')+'">'+(it.ok?'\u2713 ':'\u25CB ')+it.label+': '+(it.ok?it.want:'set to <b>'+it.want+'</b> (now '+it.have+')')+'</li>';
+        }).join('')+'</ul>'+(ready?'<b>Everything is set. Press Start trial.</b>':'');
+    } else if(st==='running'){
+      if(S.notYetUntil && performance.now()<S.notYetUntil){
+        h='<b>Not yet.</b> Not all 10 disks are at the surface. Keep watching and counting.';
+      } else if(S.flashUntil && S.view.tm<S.flashUntil){
+        h='<b>Minute '+S.minute+'.</b> Count the floating disks now and write the number on your data table.';
+      } else if(S.replay){
+        h='Watching <b>'+STEPS[S.activeStep].name+'</b> again.';
+      } else {
+        h='Watch the disks. Count each one that reaches the surface. Record your count at the end of every minute. If all 10 float before 4:00, press <b>Stop trial</b>.';
+      }
+    } else if(st==='done'){
+      var tail = (S.cur<N-1) ? 'Press the green button for fresh disks and the next step.' : '<b>All '+N+' trials are finished.</b> Finish your graph and conclusion on your paper.';
+      var head = (S.stopTime!=null)
+        ? '<b>Stopped at '+fmt(S.stopTime)+'.</b> All 10 disks were floating. Write this time on your paper. '
+        : '<b>Time is up (4:00).</b> Make sure you recorded your count for minute 4. ';
+      h=head+tail;
+    }
+    $('labMsg').innerHTML=h;
+
+    // step strip
+    var strip=$('stepStrip'); strip.innerHTML='';
+    STEPS.forEach(function(s,i){
+      var c=document.createElement('div');
+      c.className='sc'+(i===S.cur?' now':'')+(S.done[i]?' done':'');
+      var chip, cls='chip';
+      if(S.done[i]){ chip='Finished'; cls+=' ok'; }
+      else if(i===S.cur){ chip=(st==='idle')?'Ready to set up':'In progress'; }
+      else { chip='Locked'; }
+      c.innerHTML='<span class="t">'+(i+1)+'. '+s.short+'</span><span class="'+cls+'">'+chip+'</span>';
+      if(S.done[i] && (st==='idle'||st==='done')){
+        var b=document.createElement('button'); b.className='btn alt sm'; b.type='button'; b.textContent='Watch again';
+        b.onclick=function(){ startReplay(i); };
+        c.appendChild(b);
+      }
+      strip.appendChild(c);
+    });
+  }
+
+  /* ---------- render ---------- */
+  function ease(p){ return 1-Math.pow(1-p,2); }
+  function render(ts){
+    var tm=S.view.tm, trial=S.view.trial;
+    for(var i=0;i<10;i++){
+      var x=BOT[i].x, y=BOT[i].y, prog=0;
+      if(trial){
+        var r=trial.perm[i], tf=trial.t[r], rs=tf-RISE, bs=tf-BUBBLE;
+        var sx=SURF[r].x, sy=SURF[r].y;
+        if(tm<=rs){ prog=Math.max(0,Math.min(1,(tm-bs)/(rs-bs))); }
+        else if(tm<tf){ var p=ease((tm-rs)/RISE); x=BOT[i].x+(sx-BOT[i].x)*p; y=BOT[i].y+(sy-BOT[i].y)*p; prog=1; }
+        else { x=sx; y=sy+(reduce?0:Math.sin(ts/500+i*1.3)*1.2); prog=-1; }
+      }
+      diskEls[i].setAttribute('transform','translate('+x.toFixed(1)+','+y.toFixed(1)+')');
+      var nb=prog<0?0:Math.ceil(prog*3);
+      for(var b=0;b<3;b++) bubEls[i][b].setAttribute('opacity', b<nb?'0.95':'0');
+    }
+    var mm=Math.floor(tm+1e-9), ss=Math.floor((tm-mm)*60+1e-6);
+    if(tm>=DURATION){mm=DURATION;ss=0;}
+    $('clock').textContent=mm+':'+(ss<10?'0':'')+ss;
+    $('prog').style.width=(Math.min(DURATION,tm)/DURATION*100)+'%';
+  }
+  function loop(ts){
+    if(S.lastTick===null) S.lastTick=ts;
+    var dt=Math.min(0.2,(ts-S.lastTick)/1000); S.lastTick=ts;
+    if(S.status==='running'){
+      var tm=S.view.tm+dt/SEC_PER_MIN;
+      var next=Math.floor(S.view.tm+1e-9)+1;
+      if(tm>=next){ S.view.tm=next; minuteReached(next); } else { S.view.tm=tm; }
+    }
+    if(S.status==='running' && S.flashUntil && S.view.tm>=S.flashUntil){ S.flashUntil=0; updateUI(); }
+    if(S.notYetUntil && performance.now()>=S.notYetUntil){ S.notYetUntil=0; updateUI(); }
+    render(ts);
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- teacher notes ---------- */
+  function teacher(){
+    var show=location.hash.toLowerCase()==='#teacher';
+    $('teacherKey').hidden=!show;
+    if(!show) return;
+    var html='<thead><tr><th>Step</th>';
+    for(var m=1;m<=DURATION;m++) html+='<th>End of min '+m+'</th>';
+    html+='<th>All 10 float at</th></tr></thead><tbody>';
+    STEPS.forEach(function(s,i){
+      var p=s.prof, row='<tr><th scope="row" style="text-align:left">'+(i+1)+'. '+s.name+'</th>';
+      for(var m=1;m<=DURATION;m++){
+        var c=0; for(var k=0;k<10;k++){ if(p.s+(p.e-p.s)*k/9<=m+1e-9) c++; }
+        row+='<td>'+c+'</td>';
+      }
+      row+='<td>'+(p.e<=DURATION?('about '+p.e.toFixed(1)+' min'):'not within 4 min')+'</td></tr>';
+      html+=row;
+    });
+    $('tblKey').innerHTML=html+'</tbody>';
+  }
+  window.addEventListener('hashchange',teacher);
+
+  /* ---------- init ---------- */
+  applyPrefs();
+  updateScene();
+  updateUI();
+  teacher();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
